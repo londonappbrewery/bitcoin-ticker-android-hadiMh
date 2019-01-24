@@ -1,5 +1,8 @@
 package com.londonappbrewery.bitcointicker;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -38,6 +41,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         mPriceTextView = (TextView) findViewById(R.id.priceLabel);
         spinner = (Spinner) findViewById(R.id.currency_spinner);
 
+        if(!isNetworkAvailable()) {
+            Toast.makeText(getApplicationContext(), "Access to internet to get the bitcoin price",Toast.LENGTH_SHORT).show();
+        }
+
         // Create an ArrayAdapter using the String array and a spinner layout
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.currency_array, R.layout.spinner_item);
@@ -52,6 +59,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     // TODO: complete the letsDoSomeNetworking() method
     private void letsDoSomeNetworking() {
+        if(!isNetworkAvailable()) {
+            Toast.makeText(getApplicationContext(), "Access to internet to get the bitcoin price", Toast.LENGTH_SHORT).show();
+            return;
+        }
         AsyncHttpClient client = new AsyncHttpClient();
         client.get(BASE_URL + "BTC" + spinner.getSelectedItem().toString(), new JsonHttpResponseHandler() {
 
@@ -82,7 +93,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-        Toast.makeText(getApplicationContext(),"OnItemSelectedListener : " + adapterView.getItemAtPosition(i).toString(), Toast.LENGTH_SHORT).show();
         letsDoSomeNetworking();
     }
 
@@ -90,4 +100,12 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     public void onNothingSelected(AdapterView<?> adapterView) {
 
     }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+
 }
